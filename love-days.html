@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>For You ❤️</title>
+
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#b83280">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="For You ❤️">
+
+<style>
+*{margin:0;padding:0;box-sizing:border-box;font-family:Georgia,serif}
+body{height:100vh;display:flex;justify-content:center;align-items:center;background:black}
+.screen{width:360px;height:640px;background:linear-gradient(135deg,#3b0014,#b83280);
+border-radius:25px;overflow:hidden;position:relative;color:white}
+.center{position:absolute;inset:0;display:flex;flex-direction:column;
+justify-content:center;align-items:center;text-align:center;padding:30px}
+h1{font-size:26px;margin-bottom:10px}
+.name{font-size:30px;color:#ffd1e8;margin:10px 0}
+.big{font-size:20px;margin-top:10px}
+.card{position:absolute;inset:90px 30px;background:rgba(255,255,255,.18);
+backdrop-filter:blur(12px);border-radius:20px;padding:30px;text-align:center;
+opacity:0;transform:scale(.9);transition:1s}
+.card.active{opacity:1;transform:scale(1)}
+.message{margin-top:12px;font-size:16px;line-height:1.7}
+.countdown{margin-top:10px;font-size:14px}
+.hearts span{position:absolute;bottom:-20px;font-size:18px;
+animation:float 6s linear infinite;opacity:.7}
+@keyframes float{to{transform:translateY(-700px)}}
+.tap{position:absolute;bottom:20px;width:100%;text-align:center;
+animation:blink 1.5s infinite;display:none}
+@keyframes blink{50%{opacity:.4}}
+</style>
+</head>
+
+<body>
+<div class="screen">
+
+<div class="hearts"></div>
+
+<div class="center" id="pre">
+  <h1>💖 Valentine Week 💖</h1>
+  <div class="big" id="preTimer"></div>
+  <div style="margin-top:14px;font-size:14px;opacity:.85">
+    Something beautiful is waiting…
+  </div>
+</div>
+
+<div class="center" id="reveal" style="display:none">
+  <h1>For You</h1>
+  <div class="name" id="herName"></div>
+  <div>This week is my love letter ❤️</div>
+</div>
+
+<div class="card" data-date="02-07" data-text="This rose carries all my love for you 🌹">
+<h1>🌹 Rose Day</h1><div class="message"></div></div>
+
+<div class="card" data-date="02-08" data-text="I choose you. Today. Tomorrow. Always. 💍">
+<h1>💍 Propose Day</h1><div class="message"></div></div>
+
+<div class="card" data-date="02-09" data-text="You make my life sweet just by existing 🍫">
+<h1>🍫 Chocolate Day</h1><div class="message"></div></div>
+
+<div class="card" data-date="02-10" data-text="I wish I could hug you forever 🧸">
+<h1>🧸 Teddy Day</h1><div class="message"></div></div>
+
+<div class="card" data-date="02-11" data-text="I promise to stand with you in every storm 🤝">
+<h1>🤝 Promise Day</h1><div class="message"></div></div>
+
+<div class="card" data-date="02-12" data-text="One hug from you fixes everything 🤗">
+<h1>🤗 Hug Day</h1><div class="message"></div></div>
+
+<div class="card" data-date="02-13" data-text="Every kiss with you feels like home 💋">
+<h1>💋 Kiss Day</h1><div class="message"></div></div>
+
+<div class="tap" id="tap">🎶 Tap to play music ❤️</div>
+
+</div>
+
+<audio id="music" loop>
+<source src="https://cdn.pixabay.com/audio/2022/03/15/audio_9e33c92f66.mp3">
+</audio>
+
+<script>
+/* ❤️ CHANGE NAME HERE ❤️ */
+const NAME = "Anu (buddy)";
+
+const hearts=document.querySelector('.hearts');
+['❤️','💖','🌹','💋'].forEach(e=>{
+  for(let i=0;i<6;i++){
+    const s=document.createElement('span');
+    s.textContent=e;
+    s.style.left=Math.random()*100+'%';
+    s.style.animationDuration=4+Math.random()*4+'s';
+    hearts.appendChild(s);
+  }
+});
+
+const cards=document.querySelectorAll('.card');
+const pre=document.getElementById('pre');
+const reveal=document.getElementById('reveal');
+const herName=document.getElementById('herName');
+const preTimer=document.getElementById('preTimer');
+const music=document.getElementById('music');
+const tap=document.getElementById('tap');
+
+let unlocked=[],index=0,musicStarted=false,revealed=false;
+
+function update(){
+  const now=new Date(),year=now.getFullYear();
+  const rose=new Date(year,1,7,0,0,0);
+
+  if(now<rose){
+    const d=rose-now;
+    preTimer.textContent=
+      Math.floor(d/86400000)+"d "+
+      Math.floor(d%86400000/3600000)+"h "+
+      Math.floor(d%3600000/60000)+"m "+
+      Math.floor(d%60000/1000)+"s";
+    return;
+  }
+
+  if(!revealed){
+    pre.style.display="none";
+    reveal.style.display="flex";
+    herName.textContent=NAME;
+    revealed=true;
+    setTimeout(()=>reveal.style.display="none",4000);
+  }
+
+  unlocked=[];
+  cards.forEach(c=>{
+    const msg=c.querySelector('.message');
+    const [m,d]=c.dataset.date.split('-');
+    const unlock=new Date(year,m-1,d,0,0,0);
+    if(now>=unlock){
+      msg.innerHTML=c.dataset.text;
+      unlocked.push(c);
+    }else{
+      const diff=unlock-now;
+      msg.innerHTML=`🔒 Unlocks at midnight
+      <div class="countdown">⏳ ${
+      Math.floor(diff/3600000)}h ${
+      Math.floor(diff%3600000/60000)}m ${
+      Math.floor(diff%60000/1000)}s</div>`;
+    }
+  });
+
+  if(unlocked.length && !musicStarted){
+    music.play().then(()=>musicStarted=true).catch(()=>{
+      tap.style.display="block";
+      tap.onclick=()=>{music.play();tap.remove();musicStarted=true;}
+    });
+  }
+}
+
+setInterval(update,1000);update();
+
+setInterval(()=>{
+  if(!unlocked.length)return;
+  cards.forEach(c=>c.classList.remove('active'));
+  unlocked[index%unlocked.length].classList.add('active');
+  index++;
+},4000);
+
+/* 🔥 AUTO PWA INSTALL SUPPORT */
+const manifest={
+  name:"For You ❤️",
+  short_name:"Love",
+  start_url:".",
+  display:"standalone",
+  background_color:"#3b0014",
+  theme_color:"#b83280"
+};
+const blob=new Blob([JSON.stringify(manifest)],{type:"application/json"});
+const link=document.createElement("link");
+link.rel="manifest";
+link.href=URL.createObjectURL(blob);
+document.head.appendChild(link);
+</script>
+</body>
+</html>
